@@ -55,6 +55,8 @@ public:
     virtual ~Bowling();
     static  void init(const XMLNode &node, scene::IMesh *bowling);
     virtual bool updateAndDelete(int ticks) OVERRIDE;
+    virtual const core::stringw getHitString(const AbstractKart *kart_victim,
+                                             const AbstractKart *kart_attacker) const;
     virtual bool hit(AbstractKart* kart, PhysicalObject* obj=NULL) OVERRIDE;
     virtual HitEffect *getHitEffect() const OVERRIDE;
     // ------------------------------------------------------------------------
