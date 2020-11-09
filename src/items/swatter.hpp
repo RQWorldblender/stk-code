@@ -93,6 +93,10 @@ private:
 
     /** True if the swatter animation has been played. */
     bool               m_played_swatter_animation;
+
+    const core::stringw getHitString(const AbstractKart *kart_victim,
+                                     const AbstractKart *kart_attacker) const;
+
 public:
              Swatter(AbstractKart *kart, int16_t bomb_ticks, int ticks,
                      Attachment* attachment);
