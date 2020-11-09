@@ -29,12 +29,14 @@
 #include "karts/abstract_kart.hpp"
 #include "karts/controller/controller.hpp"
 #include "karts/kart_properties.hpp"
+#include "modes/linear_world.hpp"
 #include "network/network_string.hpp"
 #include "physics/physical_object.hpp"
 #include "physics/physics.hpp"
 #include "tracks/track.hpp"
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
+#include "utils/translation.hpp"
 
 #include <ISceneNode.h>
 
@@ -139,6 +141,26 @@ void Plunger::init(const XMLNode &node, scene::IMesh *plunger_model)
 }   // init
 
 // ----------------------------------------------------------------------------
+/** Picks a random message to be displayed when a kart is hit by a plunger.
+ *  \param The kart that was hit (ignored here).
+ *  \returns The string to display.
+ */
+const core::stringw Plunger::getHitString(const AbstractKart *kart_victim,
+                                          const AbstractKart *kart_attacker) const
+{
+    const int PLUNGER_IN_FACE_STRINGS_AMOUNT = 2;
+    RandomGenerator r;
+    switch (r.get(PLUNGER_IN_FACE_STRINGS_AMOUNT))
+    {
+        //I18N: shown when a player receives a plunger in his face
+        case 0: return _("%s gets a fancy mask from %s.", kart_victim->getName(), kart_attacker->getName());
+        //I18N: shown when a player receives a plunger in his face
+        case 1: return _("%s merges %s's face with a plunger.", kart_attacker->getName(), kart_victim->getName());
+        default:assert(false); return L"";   // avoid compiler warning
+    }
+}   // getHitString
+
+// ----------------------------------------------------------------------------
 void Plunger::updateGraphics(float dt)
 {
     Flyable::updateGraphics(dt);
@@ -198,6 +220,7 @@ bool Plunger::hit(AbstractKart *kart, PhysicalObject *obj)
 
     // pulling back makes no sense in battle mode, since this mode is not a race.
     // so in battle mode, always hide view
+
     if( m_reverse_mode || RaceManager::get()->isBattleMode() )
     {
         if(kart)
@@ -209,6 +232,10 @@ bool Plunger::hit(AbstractKart *kart, PhysicalObject *obj)
                 m_has_locally_played_sound = true;
                 SFXManager::get()->quickSound("plunger");
             }
+
+            RaceGUIBase* gui = World::getWorld()->getRaceGUI();
+            gui->addMessage(getHitString(kart, m_owner), NULL, 3.0f,
+                            video::SColor(255, 255, 255, 255), false, false, true);
         }
 
         m_keep_alive = 0;
