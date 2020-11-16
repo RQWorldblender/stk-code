@@ -1294,6 +1294,11 @@ namespace UserConfigParams
             PARAM_DEFAULT(  FloatUserConfigParam(64.0f, "powerup-icon-size",
             &m_powerup_setup_group, "Size of the powerup icon (scaled afterwards)") );
 
+    PARAM_PREFIX IntUserConfigParam        m_units
+        PARAM_DEFAULT(IntUserConfigParam(0, "units",
+                "The measurement format used for speed: 0 none, 1 metric, 2 imperial,\n"
+                "3 both (metric on top), 4 both (imperial on top)"));
+
     // ---- Settings for spectator camera
     PARAM_PREFIX GroupUserConfigParam       m_spectator
             PARAM_DEFAULT( GroupUserConfigParam("Spectator",
@@ -1315,6 +1320,11 @@ namespace UserConfigParams
             PARAM_DEFAULT(  BoolUserConfigParam(false, "per_player_difficulty",
                             &m_handicap,
                             "If handicapped users can be selected") );
+
+    PARAM_PREFIX BoolUserConfigParam        m_single_player_handicap
+            PARAM_DEFAULT(  BoolUserConfigParam(false, "single_player_handicap",
+                            &m_handicap,
+                            "If handicaps are enabled in single player mode") );
 
     // ---- Internet related
 

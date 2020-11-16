@@ -60,17 +60,17 @@ void OptionsScreenUI::loadedFromFile()
 
     minimap_options->m_properties[PROP_WRAP_AROUND] = "true";
     minimap_options->clearLabels();
-    //I18N: In the UI options, minimap position in the race UI 
+    //I18N: In the UI options, minimap position in the race UI
     minimap_options->addLabel( core::stringw(_("In the bottom-left")));
-    //I18N: In the UI options, minimap position in the race UI 
+    //I18N: In the UI options, minimap position in the race UI
     minimap_options->addLabel( core::stringw(_("On the right side")));
-    //I18N: In the UI options, minimap position in the race UI 
+    //I18N: In the UI options, minimap position in the race UI
     minimap_options->addLabel( core::stringw(_("Hidden")));
     //I18N: In the UI options, minimap position in the race UI
     minimap_options->addLabel( core::stringw(_("Centered")));
     minimap_options->m_properties[GUIEngine::PROP_MIN_VALUE] = "0";
 
-    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 && 
+    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 &&
                                irr_driver->getDevice()->supportsTouchDevice()) ||
                                UserConfigParams::m_multitouch_active > 1;
 
@@ -121,6 +121,25 @@ void OptionsScreenUI::loadedFromFile()
         m_reload_option->m_focus_name = "font_size";
         m_reload_option->m_focus_right = right;
     });
+
+    // Setup units spinner
+    GUIEngine::SpinnerWidget* units_options = getWidget<GUIEngine::SpinnerWidget>("units");
+    assert( units_options != NULL );
+
+    units_options->m_properties[PROP_WRAP_AROUND] = "true";
+    units_options->clearLabels();
+    //I18N: In the UI options, units used in the race UI
+    units_options->addLabel( core::stringw(_("None")));
+    //I18N: In the UI options, units used in the race UI
+    units_options->addLabel( core::stringw(_("Metric")));
+    //I18N: In the UI options, units used in the race UI
+    units_options->addLabel( core::stringw(_("Imperial")));
+    //I18N: In the UI options, units used in the race UI
+    units_options->addLabel( core::stringw(_("Both (Metric on top)")));
+    //I18N: In the UI options, units used in the race UI
+    units_options->addLabel( core::stringw(_("Both (Imperial on top)")));
+    units_options->m_properties[GUIEngine::PROP_MIN_VALUE] = "0";
+    units_options->m_properties[GUIEngine::PROP_MAX_VALUE] = "4";
 
 }   // loadedFromFile
 
@@ -202,7 +221,7 @@ void OptionsScreenUI::init()
     GUIEngine::SpinnerWidget* minimap_options = getWidget<GUIEngine::SpinnerWidget>("minimap");
     assert( minimap_options != NULL );
 
-    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 && 
+    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 &&
                                irr_driver->getDevice()->supportsTouchDevice()) ||
                                UserConfigParams::m_multitouch_active > 1;
 
@@ -212,7 +231,9 @@ void OptionsScreenUI::init()
         UserConfigParams::m_minimap_display = 1;
     }
     minimap_options->setValue(UserConfigParams::m_minimap_display);
-    
+
+    bool in_game = StateManager::get()->getGameState() == GUIEngine::INGAME_MENU;
+
     GUIEngine::SpinnerWidget* font_size = getWidget<GUIEngine::SpinnerWidget>("font_size");
     assert( font_size != NULL );
 
@@ -269,6 +290,46 @@ void OptionsScreenUI::init()
         }
     }
     speedrun_timer->setState( UserConfigParams::m_speedrun_mode );
+
+    GUIEngine::SpinnerWidget* units_options = getWidget<GUIEngine::SpinnerWidget>("units");
+    assert( units_options != NULL );
+    units_options->setValue(UserConfigParams::m_units);
+
+    // --- select the right skin in the spinner
+    bool currSkinFound = false;
+    const std::string& user_skin = UserConfigParams::m_skin_file;
+    skinSelector->setActive(!in_game);
+
+    for (int n = 0; n <= skinSelector->getMax(); n++)
+    {
+        auto ret = m_skins.find(skinSelector->getStringValueFromID(n));
+        if (ret == m_skins.end())
+            continue;
+        const std::string skinFileName = ret->second;
+
+        if (user_skin == skinFileName)
+        {
+            skinSelector->setValue(n);
+            currSkinFound = true;
+            break;
+        }
+    }
+    if (!currSkinFound)
+    {
+        Log::warn("OptionsScreenUI",
+                  "Couldn't find current skin in the list of skins!");
+        skinSelector->setValue(0);
+        irr_driver->unsetMaxTextureSize();
+        GUIEngine::reloadSkin();
+        irr_driver->setMaxTextureSize();
+    }
+
+    // --- select the right camera in the spinner
+    GUIEngine::SpinnerWidget* camera_preset = getWidget<GUIEngine::SpinnerWidget>("camera_preset");
+    assert( camera_preset != NULL );
+
+    camera_preset->setValue(UserConfigParams::m_camera_present); // use the saved camera
+    updateCameraPresetSpinner();
 }   // init
 
 // -----------------------------------------------------------------------------
@@ -499,6 +560,57 @@ void OptionsScreenUI::eventCallback(Widget* widget, const std::string& name, con
         }
         UserConfigParams::m_speedrun_mode = speedrun_timer->getState();
     }
+<<<<<<< HEAD
+=======
+    else if (name == "camera_preset")
+    {
+        GUIEngine::SpinnerWidget* camera_preset = getWidget<GUIEngine::SpinnerWidget>("camera_preset");
+        assert( camera_preset != NULL );
+        unsigned int i = camera_preset->getValue();
+        UserConfigParams::m_camera_present = i;
+        if (i == 1) //Standard
+        {
+            UserConfigParams::m_camera_fov = UserConfigParams::m_standard_camera_fov;
+            UserConfigParams::m_camera_distance = UserConfigParams::m_standard_camera_distance;
+            UserConfigParams::m_camera_forward_up_angle = UserConfigParams::m_standard_camera_forward_up_angle;
+            UserConfigParams::m_camera_forward_smoothing = UserConfigParams::m_standard_camera_forward_smoothing;
+            UserConfigParams::m_camera_backward_distance = UserConfigParams::m_standard_camera_backward_distance;
+            UserConfigParams::m_camera_backward_up_angle = UserConfigParams::m_standard_camera_backward_up_angle;
+            UserConfigParams::m_reverse_look_use_soccer_cam = UserConfigParams::m_standard_reverse_look_use_soccer_cam;
+        }
+        else if (i == 2) //Drone chase
+        {
+            UserConfigParams::m_camera_fov = UserConfigParams::m_drone_camera_fov;
+            UserConfigParams::m_camera_distance = UserConfigParams::m_drone_camera_distance;
+            UserConfigParams::m_camera_forward_up_angle = UserConfigParams::m_drone_camera_forward_up_angle;
+            UserConfigParams::m_camera_forward_smoothing = UserConfigParams::m_drone_camera_forward_smoothing;
+            UserConfigParams::m_camera_backward_distance = UserConfigParams::m_drone_camera_backward_distance;
+            UserConfigParams::m_camera_backward_up_angle = UserConfigParams::m_drone_camera_backward_up_angle;
+            UserConfigParams::m_reverse_look_use_soccer_cam = UserConfigParams::m_drone_reverse_look_use_soccer_cam;
+        }
+        else //Custom
+        {
+            UserConfigParams::m_camera_fov = UserConfigParams::m_saved_camera_fov;
+            UserConfigParams::m_camera_distance = UserConfigParams::m_saved_camera_distance;
+            UserConfigParams::m_camera_forward_up_angle = UserConfigParams::m_saved_camera_forward_up_angle;
+            UserConfigParams::m_camera_forward_smoothing = UserConfigParams::m_saved_camera_forward_smoothing;
+            UserConfigParams::m_camera_backward_distance = UserConfigParams::m_saved_camera_backward_distance;
+            UserConfigParams::m_camera_backward_up_angle = UserConfigParams::m_saved_camera_backward_up_angle;
+            UserConfigParams::m_reverse_look_use_soccer_cam = UserConfigParams::m_saved_reverse_look_use_soccer_cam;
+        }
+        updateCamera();
+    }
+    else if(name == "custom_camera")
+    {
+        new CustomCameraSettingsDialog(0.8f, 0.95f);
+    }
+    else if (name == "units")
+    {
+        GUIEngine::SpinnerWidget* units = getWidget<GUIEngine::SpinnerWidget>("units");
+        assert( units != NULL );
+        UserConfigParams::m_units = units->getValue();
+    }
+>>>>>>> 48c4d89ef (Re-enable skidding AI to handle anchors/anvils (same code from test AI))
 #endif
 }   // eventCallback
 

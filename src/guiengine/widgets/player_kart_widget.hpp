@@ -169,6 +169,7 @@ namespace GUIEngine
         // -------------------------------------------------------------------------
         void enableHandicapForNetwork();
         // -------------------------------------------------------------------------
+
         void updateSizeNow(int x, int y, int w, int h)
         {
             target_x = m_x = x;
@@ -177,6 +178,9 @@ namespace GUIEngine
             target_h = m_h = h;
             updateSize();
         }
+
+        void enableSinglePlayerHandicap();
+
     };   // PlayerKartWidget
 }
 

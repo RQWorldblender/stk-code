@@ -400,6 +400,11 @@ void PlayerKartWidget::add()
     {
         m_player_ident_spinner->addLabel(label);
         m_player_ident_spinner->setVisible(false);
+
+        if (UserConfigParams::m_single_player_handicap)
+        {
+            enableSinglePlayerHandicap();
+        }
     }
 
     assert(m_player_ident_spinner->getStringValue() == label);
@@ -768,3 +773,13 @@ void PlayerKartWidget::enableHandicapForNetwork()
         m_player_ident_spinner->getCustomText());
     m_player_ident_spinner->setCustomText(label);
 }   // enableHandicapForNetwork
+
+// -------------------------------------------------------------------------
+void PlayerKartWidget::enableSinglePlayerHandicap()
+{
+    m_handicap = HANDICAP_MEDIUM;
+    m_model_view->setBadge(ANCHOR_BADGE);
+    m_kart_stats->setValues(
+        kart_properties_manager->getKart(m_kart_internal_name),
+        HANDICAP_MEDIUM);
+}   // enableSinglePlayerHandicap
