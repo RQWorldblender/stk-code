@@ -1185,6 +1185,11 @@ namespace UserConfigParams
         PARAM_DEFAULT(IntUserConfigParam(0, "minimap_display",
                       "Minimap: 0 bottom-left, 1 middle-right, 2 hidden, 3 center"));
 
+    PARAM_PREFIX IntUserConfigParam        m_units
+        PARAM_DEFAULT(IntUserConfigParam(0, "units",
+                "The measurement format used for speed: 0 none, 1 metric, 2 imperial,\n"
+                "3 both (metric on top), 4 both (imperial on top)"));
+
     // ---- Settings for spectator camera
     PARAM_PREFIX GroupUserConfigParam       m_spectator
             PARAM_DEFAULT( GroupUserConfigParam("Spectator",
