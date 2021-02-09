@@ -271,6 +271,11 @@ GUIEngine::EventPropagation
             }
             RaceManager::get()->setPlayerKart(0, UserConfigParams::m_default_kart);
 
+            if (UserConfigParams::m_single_player_handicap)
+            {
+                RaceManager::get()->setPlayerHandicap(0, HANDICAP_MEDIUM);
+            }
+
             // Disable accidentally unlocking of a challenge
             PlayerManager::getCurrentPlayer()->setCurrentChallenge("");
 

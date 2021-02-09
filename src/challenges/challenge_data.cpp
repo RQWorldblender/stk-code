@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <sstream>
 
+#include "config/user_config.hpp"
 #include "challenges/unlock_manager.hpp"
 #include "io/file_manager.hpp"
 #include "karts/abstract_kart.hpp"
@@ -478,6 +479,12 @@ void ChallengeData::setRace(RaceManager::Difficulty d) const
     {
         RaceManager::get()->setAISuperPower(m_ai_superpower[d]);
     }
+
+    if (UserConfigParams::m_single_player_handicap)
+    {
+        RaceManager::get()->setPlayerHandicap(0, HANDICAP_MEDIUM);
+    }
+
 }   // setRace
 
 // ----------------------------------------------------------------------------

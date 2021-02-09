@@ -170,10 +170,9 @@ bool DemoWorld::updateIdleTimeAndStartDemo(float dt)
 
     StateManager::get()->enterGameState();
     RaceManager::get()->setNumPlayers(1);
-    InputDevice *device;
 
-    // Use keyboard 0 by default in --no-start-screen
-    device = input_manager->getDeviceManager()->getKeyboard(0);
+    // Use the last used device
+    InputDevice* device = input_manager->getDeviceManager()->getLatestUsedDevice();
     StateManager::get()->createActivePlayer(
                            PlayerManager::get()->getPlayer(0), device);
     // ASSIGN should make sure that only input from assigned devices
@@ -184,6 +183,12 @@ bool DemoWorld::updateIdleTimeAndStartDemo(float dt)
     RaceManager::get()->setNumKarts(m_default_num_karts);
     // Use the user's last selected kart
     RaceManager::get()->setPlayerKart(0, UserConfigParams::m_default_kart);
+
+    if (UserConfigParams::m_single_player_handicap)
+    {
+        RaceManager::get()->setPlayerHandicap(0, HANDICAP_MEDIUM);
+    }
+
     RaceManager::get()->setupPlayerKartInfo();
     RaceManager::get()->startSingleRace(m_demo_tracks[0], m_num_laps, false);
     m_demo_tracks.push_back(m_demo_tracks[0]);
