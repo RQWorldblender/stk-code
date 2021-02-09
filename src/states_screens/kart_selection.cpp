@@ -1192,7 +1192,7 @@ bool KartSelectionScreen::onEscapePressed()
     {
         return true;
     }
-}
+}   // onEscapePressed
 
 // ----------------------------------------------------------------------------
 
@@ -1333,7 +1333,9 @@ void KartSelectionScreen::allPlayersDone()
     }
     else
     {
-        RaceSetupScreen::getInstance()->push();
+        RaceSetupScreen* s = RaceSetupScreen::getInstance();
+        s->setFromKartSelection(true);
+        s->push();
     }
 }   // allPlayersDone
 
