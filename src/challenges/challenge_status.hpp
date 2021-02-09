@@ -84,7 +84,7 @@ public:
         return ((m_solved >> (int) d)&0x01) == 1;
     }   // isSolved
     // ------------------------------------------------------------------------
-    /** Returns true if this challenge was solved at any difficult.
+    /** Returns true if this challenge was solved at any difficulty.
      */
     bool isSolvedAtAnyDifficulty() const { return m_solved != 0; }
     /** Returns the highest difficulty at which this challenge was solved.
@@ -120,7 +120,8 @@ public:
     bool isGrandPrix();
     // ------------------------------------------------------------------------
     /** Used when a challenge's requirement in the hardest difficulty are
-      * matched in a lower difficulty. Don't apply to GP */
+      * matched in a lower difficulty or with single player handicaps.
+      * Does not apply to GP. */
     void setMaxReqInLowerDiff()
     {
         if (!isGrandPrix() && !isUnlockList())
