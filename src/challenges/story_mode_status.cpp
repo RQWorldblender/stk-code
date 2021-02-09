@@ -219,7 +219,7 @@ void StoryModeStatus::unlockFeatureByList()
                 m_next_unlock_points = i->second->getData()->getNumTrophies();
         }
     }
-} //unlockFeatureByList
+}   // unlockFeatureByList
 
 
 //-----------------------------------------------------------------------------
@@ -274,17 +274,18 @@ void StoryModeStatus::setCurrentChallenge(const std::string &challenge_id)
  */
 void StoryModeStatus::raceFinished()
 {
-    if(m_current_challenge                                            &&
-        RaceManager::get()->getDifficulty() != RaceManager::DIFFICULTY_BEST &&
-        m_current_challenge->getData()->isChallengeFulfilled(true /*best*/))
+    if(m_current_challenge && ((RaceManager::get()->getDifficulty() != RaceManager::DIFFICULTY_BEST &&
+        m_current_challenge->getData()->isChallengeFulfilled(true /*best*/)) ||
+        (UserConfigParams::m_single_player_handicap &&
+        RaceManager::get()->getDifficulty() == RaceManager::DIFFICULTY_BEST &&
+        m_current_challenge->getData()->isChallengeFulfilled())))
     {
         ChallengeStatus* c = const_cast<ChallengeStatus*>(m_current_challenge);
         c->setMaxReqInLowerDiff();
     }
 
-    if(m_current_challenge                                           &&
-        m_current_challenge->isActive(RaceManager::get()->getDifficulty()) &&
-        m_current_challenge->getData()->isChallengeFulfilled()           )
+    if(m_current_challenge && m_current_challenge->isActive(RaceManager::get()->getDifficulty()) &&
+        m_current_challenge->getData()->isChallengeFulfilled())
     {
         // cast const away so that the challenge can be set to fulfilled.
         // The 'clean' implementation would involve searching the challenge
