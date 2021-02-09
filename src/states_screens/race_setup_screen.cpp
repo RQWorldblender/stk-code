@@ -50,6 +50,7 @@ using namespace GUIEngine;
 
 RaceSetupScreen::RaceSetupScreen() : Screen("race_setup.stkgui")
 {
+    m_from_kart_selection = false;
 }   // RaceSetupScreen
 
 // -----------------------------------------------------------------------------
@@ -194,6 +195,14 @@ void RaceSetupScreen::init()
             hardestWidget->setActive(true);
         }
     }
+
+    // Apply single player handicap settings in case the race setup screen was
+    // not entered through the kart selection screen
+    if(RaceManager::get()->getNumLocalPlayers() == 1 &&
+       UserConfigParams::m_single_player_handicap && !(m_from_kart_selection))
+    {
+        RaceManager::get()->setPlayerHandicap(0, HANDICAP_MEDIUM);
+    }
 }   // init
 
 // -----------------------------------------------------------------------------
@@ -275,6 +284,17 @@ void RaceSetupScreen::eventCallback(Widget* widget, const std::string& name,
     }
 
 }   // eventCallback
+
+// ----------------------------------------------------------------------------
+
+bool RaceSetupScreen::onEscapePressed()
+{
+    if (m_from_kart_selection)
+    {
+        m_from_kart_selection = false;
+    }
+    return true;
+}   // onEscapePressed
 
 // -----------------------------------------------------------------------------
 /** Converts the difficulty string into a RaceManager::Difficulty value

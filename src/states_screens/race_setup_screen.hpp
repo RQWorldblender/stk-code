@@ -36,7 +36,13 @@ class RaceSetupScreen : public GUIEngine::Screen, public GUIEngine::ScreenSingle
 
     void assignDifficulty();
 
+    /** Whether this screen is being visited from kart selection screen or not */
+    bool m_from_kart_selection;
+
 public:
+    /** \brief Set whether this screen is being visited from kart selection screen or not */
+    void setFromKartSelection(bool from_kart_selection)
+    { m_from_kart_selection = from_kart_selection; }
 
     /** \brief implement callback from parent class GUIEngine::Screen */
     virtual void loadedFromFile() OVERRIDE;
@@ -47,6 +53,10 @@ public:
 
     /** \brief implement callback from parent class GUIEngine::Screen */
     virtual void init() OVERRIDE;
+
+    /** \brief implement optional callback from parent
+     *  class GUIEngine::Screen */
+    virtual bool onEscapePressed() OVERRIDE;
 };
 
 #endif
