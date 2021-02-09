@@ -166,6 +166,8 @@ namespace GUIEngine
         virtual GUIEngine::EventPropagation onSpinnerConfirmed();
         // -------------------------------------------------------------------------
         void enableHandicapForNetwork();
+        // -------------------------------------------------------------------------
+        void enableSinglePlayerHandicap();
     };   // PlayerKartWidget
 }
 

@@ -1212,6 +1212,11 @@ namespace UserConfigParams
                             &m_handicap,
                             "If handicapped users can be selected") );
 
+    PARAM_PREFIX BoolUserConfigParam        m_single_player_handicap
+            PARAM_DEFAULT(  BoolUserConfigParam(false, "single_player_handicap",
+                            &m_handicap,
+                            "If handicaps are enabled in single player mode") );
+
     // ---- Internet related
 
     PARAM_PREFIX IntUserConfigParam        m_internet_status
