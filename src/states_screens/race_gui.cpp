@@ -1124,6 +1124,7 @@ void RaceGUI::drawSpeedEnergyRank(const AbstractKart* kart,
     {
         gui::ScalableFont* font = GUIEngine::getFont();
         static video::SColor color = video::SColor(255, 255, 255, 255);
+        font->setScale(0.9f);
         font->setBlackBorder(true);
 
         std::ostringstream speedOSS;
@@ -1183,7 +1184,7 @@ void RaceGUI::drawSpeedEnergyRank(const AbstractKart* kart,
             font->draw(speedOSS.str().c_str(), digiPosT, color);
             font->draw(speed2OSS.str().c_str(), digiPosB, color);
         }
-
+        font->setScale(1.0f);
         font->setBlackBorder(false);
     }
 
