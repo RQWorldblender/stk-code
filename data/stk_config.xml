@@ -16,7 +16,7 @@
   <!-- Maximum number of karts to be used at the same time. This limit
        can easily be increased, but some tracks might not have valid start
        positions for those additional karts. -->
-  <karts max-number="20"/>
+  <karts max-number="30"/>
 
   <!-- Everything related to hardware configuration.
             url : The server used for reporting statistics to. -->
@@ -576,7 +576,7 @@
        hardware skinning, For gles 3.0 the specification guarantees at least 2048, for
        TBO in desktop at least 65536 (max buffer size) / 64, SSBO at least 2^24 / 64,
        so 1024 will work everywhere. -->
-  <skinning max-bones="1024"/>
+  <skinning max-bones="65535"/>
 
   <!-- For users with libsquish:
     Use a slow but high quality colour compressor.
