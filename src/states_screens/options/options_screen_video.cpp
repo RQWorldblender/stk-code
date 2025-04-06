@@ -20,6 +20,10 @@
 
 #include "graphics/central_settings.hpp"
 #include "graphics/irr_driver.hpp"
+#include "graphics/shader.hpp"
+#include "graphics/sp/sp_base.hpp"
+#include "graphics/sp/sp_texture_manager.hpp"
+#include "graphics/stk_tex_manager.hpp"
 #include "io/file_manager.hpp"
 #include "states_screens/dialogs/custom_video_settings.hpp"
 #include "states_screens/dialogs/recommend_video_settings.hpp"
@@ -124,11 +128,9 @@ void OptionsScreenVideo::initPresets()
     m_scale_rtts_custom_presets.push_back({ 0.9f });
     m_scale_rtts_custom_presets.push_back({ 0.95f });
     m_scale_rtts_custom_presets.push_back({ 1.0f });
-#ifndef MOBILE_STK
     m_scale_rtts_custom_presets.push_back({ 1.25f });
     m_scale_rtts_custom_presets.push_back({ 1.5f });
     m_scale_rtts_custom_presets.push_back({ 2.0f });
-#endif
 
 }   // initPresets
 
@@ -160,6 +162,8 @@ int OptionsScreenVideo::getImageQuality()
 void OptionsScreenVideo::setImageQuality(int quality)
 {
 #ifndef SERVER_ONLY
+    core::dimension2du prev_max_size = irr_driver->getVideoDriver()
+        ->getDriverAttributes().getAttributeAsDimension2d("MAX_TEXTURE_SIZE");
     GE::GEVulkanTextureDescriptor* td = NULL;
     if (GE::getVKDriver())
         td = GE::getVKDriver()->getMeshTextureDescriptor();
@@ -170,21 +174,21 @@ void OptionsScreenVideo::setImageQuality(int quality)
             UserConfigParams::m_high_definition_textures = 0x02;
             UserConfigParams::m_hq_mipmap = false;
             if (td)
-                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_2);
+                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_4);
             break;
         case 1:
             UserConfigParams::m_anisotropic = 16;
             UserConfigParams::m_high_definition_textures = 0x02;
             UserConfigParams::m_hq_mipmap = false;
             if (td)
-                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_2);
+                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_16);
             break;
         case 2:
             UserConfigParams::m_anisotropic = 16;
             UserConfigParams::m_high_definition_textures = 0x03;
             UserConfigParams::m_hq_mipmap = false;
             if (td)
-                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_4);
+                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_16);
             break;
         case 3:
             UserConfigParams::m_anisotropic = 16;
@@ -196,14 +200,28 @@ void OptionsScreenVideo::setImageQuality(int quality)
         default:
             assert(false);
     }
+
+    irr_driver->setMaxTextureSize();
+    SP::setMaxTextureSize();
+    core::dimension2du cur_max_size = irr_driver->getVideoDriver()
+        ->getDriverAttributes().getAttributeAsDimension2d("MAX_TEXTURE_SIZE");
+
+    if (CVS->isGLSL())
+    {
+        ShaderBase::killShaders();
+        SP::initSamplers();
+        if (prev_max_size != cur_max_size)
+            SP::SPTextureManager::get()->reloadTexture("");
+    }
+    else if (prev_max_size != cur_max_size)
+        STKTexManager::getInstance()->reloadAllTextures(true/*mesh_texture_only*/);
 #endif
 }   // setImageQuality
 
 // --------------------------------------------------------------------------------------------
 
 OptionsScreenVideo::OptionsScreenVideo() : Screen("options/options_video.stkgui"),
-                                           m_prev_adv_pipline(false),
-                                           m_prev_img_quality(-1)
+                                           m_prev_adv_pipline(false)
 {
     m_inited = false;
     initPresets();
@@ -238,7 +256,6 @@ void OptionsScreenVideo::init()
     OptionsCommon::setTabStatus();
 
     m_prev_adv_pipline = UserConfigParams::m_dynamic_lights;
-    m_prev_img_quality = getImageQuality();
     RibbonWidget* ribbon = getWidget<RibbonWidget>("options_choice");
     assert(ribbon != NULL);
     ribbon->setFocusForPlayer(PLAYER_ID_GAME_MASTER);
@@ -301,11 +318,9 @@ void OptionsScreenVideo::init()
     scale_rtts->addLabel("90%");
     scale_rtts->addLabel("95%");
     scale_rtts->addLabel("100%");
-#ifndef MOBILE_STK
     scale_rtts->addLabel("125%");
     scale_rtts->addLabel("150%");
     scale_rtts->addLabel("200%");
-#endif
 
     // --- set gfx settings values
     updateGfxSlider();
@@ -437,6 +452,14 @@ void OptionsScreenVideo::updateScaleRTTsSlider()
         {
             scale_rtts_level->setValue(l);
             found = true;
+            if (m_scale_rtts_custom_presets[l].value > 1.0f)
+            {
+                scale_rtts_level->markAsIncorrect();
+            }
+            else
+            {
+                scale_rtts_level->markAsCorrect();
+            }
             break;
         }
     }
@@ -711,27 +734,14 @@ void OptionsScreenVideo::tearDown()
 /* Returns 1 or 2 if a restart will be done, 0 otherwise */
 int OptionsScreenVideo::applySettings()
 {
-    int restart = 0;
 #ifndef SERVER_ONLY
     if (m_prev_adv_pipline != UserConfigParams::m_dynamic_lights && CVS->isGLSL())
-        restart = 1;
-
-    if (m_prev_img_quality != getImageQuality())
     {
-        irr_driver->setMaxTextureSize();
-        // A full restart is needed to properly apply anisotropic filtering if it was changed
-        // We assume that all ImageQuality settings >= 1 use the same x16 setting.
-        if ((m_prev_img_quality == 0 && getImageQuality() != 0) ||
-            (m_prev_img_quality != 0 && getImageQuality() == 0))
-            restart = 2;
-    }
-
-    if (restart == 1)
         irr_driver->sameRestart();
-    else if (restart == 2)
-        irr_driver->fullRestart();
+        return 1;
+    }
 #endif
-    return restart;
+    return 0;
 }   // applySettings
 
 // --------------------------------------------------------------------------------------------
