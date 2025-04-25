@@ -2526,11 +2526,13 @@ void GEVulkanDriver::updateDriver(bool pbr_changed)
     {
         GEVulkanShaderManager::destroy();
         GEVulkanShaderManager::init(this);
+        GEVulkanSampler sampler = m_mesh_texture_descriptor->getSamplerUse();
         delete m_mesh_texture_descriptor;
         m_mesh_texture_descriptor = new GEVulkanTextureDescriptor(
             GEVulkanShaderManager::getSamplerSize(),
             GEVulkanShaderManager::getMeshTextureLayer(),
             GEVulkanFeatures::supportsBindMeshTexturesAtOnce());
+        m_mesh_texture_descriptor->setSamplerUse(sampler);
         GEVulkanMeshCache* mc = getVulkanMeshCache();
         if (!GEVulkanFeatures::supportsBaseVertexRendering())
         {
@@ -2561,6 +2563,22 @@ void GEVulkanDriver::updateDriver(bool pbr_changed)
     GEVulkan2dRenderer::init(this);
     setDisableWaitIdle(false);
 }   // updateDriver
+
+// ----------------------------------------------------------------------------
+void GEVulkanDriver::reloadShaders()
+{
+    waitIdle();
+    setDisableWaitIdle(true);
+    clearDrawCallsCache();
+    GEVulkanShaderManager::destroy();
+    GEVulkanShaderManager::init(this);
+    for (auto& dc : static_cast<GEVulkanSceneManager*>(
+        m_irrlicht_device->getSceneManager())->getDrawCalls())
+        dc.second = std::unique_ptr<GEVulkanDrawCall>(new GEVulkanDrawCall);
+    GEVulkan2dRenderer::destroy();
+    GEVulkan2dRenderer::init(this);
+    setDisableWaitIdle(false);
+}   // reloadShaders
 
 // ----------------------------------------------------------------------------
 void GEVulkanDriver::clearDrawCallsCache()
