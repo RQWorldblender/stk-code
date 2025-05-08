@@ -175,7 +175,7 @@ void RaceSetupScreen::init()
         break;
     }
 
-    w2->setItemCountHint(5);
+    w2->setItemCountHint(8);
 
     {
         RibbonWidget* w = getWidget<RibbonWidget>("difficulty");
