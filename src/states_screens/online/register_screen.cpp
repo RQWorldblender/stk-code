@@ -149,6 +149,7 @@ void RegisterScreen::init()
 
     TextBoxWidget* local_username = getWidget<TextBoxWidget>("local_username");
     local_username->setText(username);
+    local_username->setFocusForPlayer(PLAYER_ID_GAME_MASTER);
 
     m_password_widget->setPasswordBox(true, L'*');
     getWidget<TextBoxWidget>("password_confirm")->setPasswordBox(true, L'*');
@@ -314,8 +315,10 @@ void RegisterScreen::doRegister()
     {
         core::stringw password = m_password_widget->getText();
         core::stringw online_name = getWidget<TextBoxWidget>("username")->getText().trim();
+#ifndef SERVER_ONLY
         m_parent_screen->setNewAccountData(true, /*auto login*/true,
                                            online_name, password);
+#endif
         StateManager::get()->popMenu();
         return;
     }
@@ -404,10 +407,11 @@ void RegisterScreen::doRegister()
             if (player)
             {
                 core::stringw online_name = getWidget<TextBoxWidget>("username")->getText().trim();
+#ifndef SERVER_ONLY
                 m_parent_screen->setNewAccountData(/*online*/true, 
                                                    /*auto_login*/false,
                                                    username, password);
-
+#endif
                 player->setLastOnlineName(username);
                 player->setWasOnlineLastTime(true);
             }
